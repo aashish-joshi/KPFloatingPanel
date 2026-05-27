@@ -44,6 +44,7 @@ namespace KPFloatingPanel
 			this.toolStripTextSearch = new System.Windows.Forms.ToolStripTextBox();
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
 			this.LastOne = new System.Windows.Forms.ToolStripMenuItem();
+			this.LastTwo = new System.Windows.Forms.ToolStripMenuItem();
 			this.tmClock = new System.Windows.Forms.Timer(this.components);
 			this.ilIcons = new System.Windows.Forms.ImageList(this.components);
 			this.timer_search = new System.Windows.Forms.Timer(this.components);
@@ -117,8 +118,9 @@ namespace KPFloatingPanel
 			// 
 			this.pmPasswords.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miNoPasswords,
-            this.toolStripMenuSaveDatabase,
+			this.toolStripMenuSaveDatabase,
 			this.LastOne,
+			this.LastTwo,
             this.toolStripTextSearch,
             this.toolStripSeparator3
             
@@ -160,7 +162,13 @@ namespace KPFloatingPanel
 			// 
 			this.LastOne.Name = "LastOne";
 			resources.ApplyResources(this.LastOne, "LastOne");
-			// 
+			//
+			// LastTwo
+			//
+			this.LastTwo.Name = "LastTwo";
+			this.LastTwo.Text = "LastTwo";
+			this.LastTwo.Visible = false;
+			//
 			// tmClock
 			// 
 			this.tmClock.Enabled = true;
@@ -235,5 +243,6 @@ namespace KPFloatingPanel
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
 		private System.Windows.Forms.ToolStripMenuItem LastOne;
+		private System.Windows.Forms.ToolStripMenuItem LastTwo;
 	}
 }

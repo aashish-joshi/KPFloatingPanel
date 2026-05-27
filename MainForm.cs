@@ -27,6 +27,8 @@ namespace KPFloatingPanel {
 		internal IPluginHost Host;
 
 		private const int SpaceForButtons = 300;
+		private const int RecentEntryLimit = 2;
+		private readonly List<PwEntry> FRecentEntries = new List<PwEntry>();
 		private HotKeyboardHook kb_shortcut;
         private HotKeyboardHook kb_shortcut_quick;
 		private HotKeyboardHook.ModifierKeys shortcut_last_mod;
@@ -299,12 +301,10 @@ namespace KPFloatingPanel {
 		}
 
 		private void reload_menu() {
-			int i = pmPasswords.Items.Count - 1;
 			pmPasswords.SuspendLayout();
-			while (i >= 5) {
-				pmPasswords.Items.Remove(pmPasswords.Items[i]);
-				i--;
-			}
+			int firstDynamicItem = pmPasswords.Items.IndexOf(toolStripSeparator3) + 1;
+			while (pmPasswords.Items.Count > firstDynamicItem)
+				pmPasswords.Items.RemoveAt(pmPasswords.Items.Count - 1);
 			miNoPasswords.Visible = true;
 			miNoPasswords.Enabled = false;
 			miNoPasswords.Image = null;
@@ -317,16 +317,14 @@ namespace KPFloatingPanel {
 			    toolStripTextSearch.Visible = false;
 				miNoPasswords.Image = ilIcons.Images[6];
 
-				//reset "LastOne"-Entry as soon as database is locked
-				LastOne.Visible = false;
-				LastOne.Text = "LastOne";
-				LastOne.DropDownItems.Clear();
+				FRecentEntries.Clear();
+				ClearRecentMenuItem(LastOne);
+				ClearRecentMenuItem(LastTwo);
 			}
 			else
 				if ((Host.Database != null) && (Host.Database.IsOpen))
 				{
 				    toolStripTextSearch.Visible =  FOptions.showSearch;
-					LastOne.Visible = FOptions.showLastOne && LastOne.Text != "LastOne";
 					PwGroup start_group = Host.Database.RootGroup;
 					if (start_group != null && !string.IsNullOrEmpty(FOptions.startGroupUUID)) {
 						PwObjectList<PwGroup> all_groups = Host.Database.RootGroup.GetGroups(true);
@@ -339,36 +337,20 @@ namespace KPFloatingPanel {
 						if (start_group.Entries.UCount <= 0 && start_group.Groups.UCount <= 0)
 							start_group = Host.Database.RootGroup;
 					}
-					//on default LastOne is visible
-					PwEntry last_entry = LastOne.Tag as PwEntry;
-					bool last_entry_ok = false;
-					if (last_entry != null) {
-						PwGroup tmp_grp = last_entry.ParentGroup;
-						while (tmp_grp != null) {
-							if (tmp_grp == start_group) {
-								last_entry_ok = true;
-								break;
-							}
-							if (tmp_grp == Host.Database.RootGroup)
-								break;
-							tmp_grp = tmp_grp.ParentGroup;
-						}
-					}
-					if (!last_entry_ok)
-						LastOne.Visible = false;
+					UpdateRecentMenuItems(start_group);
 
 					if ((start_group != null) && ((start_group.Entries.UCount > 0) || (start_group.Groups.UCount > 0))) {
 						AddGroupToMenu(null, start_group);
 						miNoPasswords.Visible = false;
 					}
 					else {
-                        toolStripTextSearch.Visible = LastOne.Visible = false;
+                        toolStripTextSearch.Visible = LastOne.Visible = LastTwo.Visible = false;
 						miNoPasswords.Text = "-= No passwords =-";
 						miNoPasswords.ToolTipText = "There are no passwords defined.\nOpen KeePass and create some new passwords.";
 					}
 				}
 				else {
-                    toolStripTextSearch.Visible = LastOne.Visible = false;
+                    toolStripTextSearch.Visible = LastOne.Visible = LastTwo.Visible = false;
 					miNoPasswords.Text = "-= No database open =-";
 					miNoPasswords.ToolTipText = "There is no opened database.\nPlease open existing or create new database.";
 				}
@@ -376,6 +358,50 @@ namespace KPFloatingPanel {
 			AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			AutoScaleMode = AutoScaleMode.Font;
 			pmPasswords.ResumeLayout();
+		}
+
+		private void ClearRecentMenuItem(ToolStripMenuItem item) {
+			item.Visible = false;
+			item.Tag = null;
+			item.DropDownItems.Clear();
+		}
+
+		private bool IsEntryInGroup(PwEntry entry, PwGroup startGroup) {
+			if (entry == null || startGroup == null)
+				return false;
+
+			PwGroup group = entry.ParentGroup;
+			while (group != null) {
+				if (group == startGroup)
+					return true;
+				if (group == Host.Database.RootGroup)
+					break;
+				group = group.ParentGroup;
+			}
+			return false;
+		}
+
+		private void UpdateRecentMenuItems(PwGroup startGroup) {
+			ToolStripMenuItem[] recentItems = new ToolStripMenuItem[] { LastOne, LastTwo };
+			foreach (ToolStripMenuItem recentItem in recentItems)
+				ClearRecentMenuItem(recentItem);
+
+			if (!FOptions.showLastOne)
+				return;
+
+			int displayed = 0;
+			foreach (PwEntry entry in FRecentEntries) {
+				if (!IsEntryInGroup(entry, startGroup))
+					continue;
+
+				ToolStripMenuItem item = recentItems[displayed++];
+				item.Text = entry.Strings.ReadSafe(PwDefs.TitleField);
+				item.Tag = entry;
+				AddActionsToItem(item, entry);
+				item.Visible = true;
+				if (displayed == recentItems.Length)
+					break;
+			}
 		}
 
 		private void miNoPasswords_Click(object sender, EventArgs e) {
@@ -627,21 +653,20 @@ namespace KPFloatingPanel {
 				MessageService.ShowWarning(ex);
 			}
 		}
-		private void SetLastOne(ToolStripMenuItem item) {
+		private void RecordRecentEntry(ToolStripMenuItem item) {
 			if (!FOptions.showLastOne)
 				return;
-			ToolStripMenuItem ParentItem;
-			while (item != LastOne && (ParentItem = item.OwnerItem as ToolStripMenuItem) != null && ParentItem.Tag == item.Tag)
-				item = ParentItem;
 
-			if (item == LastOne)
+			PwEntry entry = item.Tag as PwEntry;
+			if (entry == null)
 				return;
 
-			LastOne.Text = item.Text;
-			LastOne.Tag = item.Tag;
-			LastOne.DropDownItems.Clear();
-			AddActionsToItem(LastOne, item.Tag as PwEntry);
-			LastOne.Visible = true;
+			FRecentEntries.RemoveAll(delegate(PwEntry recentEntry) {
+				return recentEntry.Uuid.Equals(entry.Uuid);
+			});
+			FRecentEntries.Insert(0, entry);
+			if (FRecentEntries.Count > RecentEntryLimit)
+				FRecentEntries.RemoveAt(RecentEntryLimit);
 		}
 		private void CustomOpenEntryUrl(PwEntry pe) {
 			Debug.Assert(pe != null);
@@ -664,7 +689,7 @@ namespace KPFloatingPanel {
 
 			if (FOptions.URLAction == 0) {
 				CustomOpenEntryUrl(Entry);
-				SetLastOne(Item);
+				RecordRecentEntry(Item);
 			}
 			else
 				if (FOptions.URLAction == 1)
@@ -685,7 +710,7 @@ namespace KPFloatingPanel {
 			PwEntry Entry = (PwEntry)Item.Tag;
 			if (Entry == null)
 				return;
-			SetLastOne(Item);
+			RecordRecentEntry(Item);
 			if (FieldName == PwDefs.PasswordField && PwDefs.IsTanEntry(Entry)) {
 				Entry.ExpiryTime = DateTime.Now;
 				Entry.Expires = true;

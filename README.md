@@ -3,21 +3,34 @@ KP Floating Panel for KeePass 2.x
 
 RECENT CHANGES
 -----
-(MitchCapper unless otherwise noted)
+- 7.6 Show the two most recently used entries in the floating panel and update the project target to .NET Framework 4.7.2. (aashish-joshi)
+- Previous releases by MitchCapper unless otherwise noted.
 - 7.5 Some transparency and minor fixes.
 - 7.0 Moved to git(hub), KP 2.3 support, High DPI support
 
 
 OVERVIEW
 -----
-KP Floating Panel allows easy access to KeePass entries through a small floating panel on your screen.  Allows quick keyboard access and searching (along with opening, auto type, etc) without opening the KeePass window.  Multiple keyboard shortcut an display options.  Originally written by Alexeev Alexander and improved upon by s² now maintained by Mitch Capper.  Older Changelog has full history.
+KP Floating Panel allows easy access to KeePass entries through a small floating panel on your screen. It supports quick keyboard access and searching (along with opening, auto-type, etc.) without opening the KeePass window, plus multiple shortcut and display options. Originally written by Alexeev Alexander, improved upon by sÂ², and later maintained by Mitch Capper. This fork is maintained by aashish-joshi. The older changelog has the full history.
 
 INSTALLATION
 -----
-- Download from https://github.com/mitchcapper/KPFloatingPanel/releases
-- Place the (KPFloatPanel.plgx) in the KeePass program directory
+- Download the latest DLL or PLGX release from https://github.com/aashish-joshi/KPFloatingPanel/releases
+- In KeePass, choose Tools > Plugins > Open Folder and place the plugin file in that Plugins folder.
 - Start KeePass and open a database.  Right click on the floating panel near the top of the screen and go to settings, configure as you like.  
 - Click on the floating panel to open, or use the global hotkey setup to open it from the keyboard
+
+BUILDING
+-----
+- Requires KeePass 2.x and .NET Framework 4.7.2 reference assemblies.
+- Update the KeePass reference in `KPFloatingPanel.csproj` if KeePass is installed outside `C:\Program Files\KeePass Password Safe 2\KeePass.exe`.
+- Build the DLL from PowerShell:
+
+      & 'C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe' KPFloatingPanel.csproj /t:Build /p:Configuration=Debug /nologo /verbosity:minimal
+
+- To create a PLGX package from a clean source copy, run KeePass with an absolute source directory path:
+
+      & 'C:\Program Files\KeePass Password Safe 2\KeePass.exe' --plgx-create 'C:\Path\To\KPFloatingPanel' --plgx-prereq-net:4.7.2 --plgx-prereq-os:Windows
 
 MAJOR OPTIONS
 -----
@@ -25,6 +38,7 @@ MAJOR OPTIONS
 - Show clock in the floating panel
 - Only show entries from a specific subgroup in keepass rather than all entries
 - Search option (that auto focuses) so you can just type to find an entry
+- Show the two most recently used entries for quick reuse
 - Global hot key so you can just hit the keyboard combination to open the floating panel
 - QuickPass hot key to get a quick random password
 
@@ -55,10 +69,10 @@ OLDER CHANGELOG
  -  Removed the floating panel from showing up in the ALT-Tab list.
  -  Ability to search right from the floating panel.  When search is enabled a textbox will appear as the top of the list, and any time it opens it will have focus by default.  As you type it will search the list and show you as you type the results.  You can then interact with the results or just hit enter and the first ones default action will be taken.  This allows for complete keyboard interaction with the floating panel, hit the global hot key, type part of the entry you want, hit enter, and your done.  When you search it flatens out all the groups, so even if the entry is in a sub-group it will show up in the results
 
-2.0.9 (2009.09.12) changed by s²
+2.0.9 (2009.09.12) changed by sÂ²
  -  implemented a new option to directly jump into the edit-entry dialog from floating panel
 
-1.0.2 (2009.06.20) changed by s²
+1.0.2 (2009.06.20) changed by sÂ²
  -  introduced new feature "sort alphabetical" which can be selected/deselected under settings=>behaviour
  -  compiled for KeePass v2.0.7
  -  Some minor changes due to suggestions of FxCop 

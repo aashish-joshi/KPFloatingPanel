@@ -3,7 +3,7 @@ KP Floating Panel for KeePass 2.x
 
 RECENT CHANGES
 -----
-- 7.6 Show the two most recently used entries in the floating panel and update the project target to .NET Framework 4.7.2. (aashish-joshi)
+- 7.6 Show the two most recently used entries in the floating panel and update the project target to .NET Framework 4.8.1. (aashish-joshi)
 - Previous releases by MitchCapper unless otherwise noted.
 - 7.5 Some transparency and minor fixes.
 - 7.0 Moved to git(hub), KP 2.3 support, High DPI support
@@ -22,7 +22,7 @@ INSTALLATION
 
 BUILDING
 -----
-- Requires KeePass 2.x and .NET Framework 4.7.2 reference assemblies.
+- Requires KeePass 2.x and the .NET Framework 4.8.1 Developer Pack.
 - Update the KeePass reference in `KPFloatingPanel.csproj` if KeePass is installed outside `C:\Program Files\KeePass Password Safe 2\KeePass.exe`.
 - Build the DLL from PowerShell:
 
@@ -30,7 +30,7 @@ BUILDING
 
 - To create a PLGX package from a clean source copy, run KeePass with an absolute source directory path:
 
-      & 'C:\Program Files\KeePass Password Safe 2\KeePass.exe' --plgx-create 'C:\Path\To\KPFloatingPanel' --plgx-prereq-net:4.7.2 --plgx-prereq-os:Windows
+      & 'C:\Program Files\KeePass Password Safe 2\KeePass.exe' --plgx-create 'C:\Path\To\KPFloatingPanel' --plgx-prereq-net:4.8.1 --plgx-prereq-os:Windows
 
 MAJOR OPTIONS
 -----

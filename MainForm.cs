@@ -738,9 +738,11 @@ namespace KPFloatingPanel {
 			PwEntryForm myForm = new PwEntryForm();
 			myForm.InitEx(Entry, PwEditMode.EditExistingEntry, Host.MainWindow.DocumentManager.ActiveDatabase, Host.MainWindow.ClientIcons, false, true);
 
-			if ((myForm.ShowDialog() == DialogResult.OK))
+			if (myForm.ShowDialog(this) == DialogResult.OK)
 				Host.MainWindow.UpdateUI(false, null, Host.MainWindow.DocumentManager.ActiveDatabase.UINeedsIconUpdate, null, true, null, true);
 			Host.MainWindow.RefreshEntriesList();
+			TopMost = true;
+			BringToFront();
 		}
 
 

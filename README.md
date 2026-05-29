@@ -3,6 +3,7 @@ KP Floating Panel for KeePass 2.x
 
 RECENT CHANGES
 -----
+- 7.6.1 Fixed an issue where the floating panel could lose its always-on-top state after closing the Edit Entry dialog.
 - 7.6 Show the two most recently used entries in the floating panel and update the project target to .NET Framework 4.8.1. (aashish-joshi)
 - Previous releases by MitchCapper unless otherwise noted.
 - 7.5 Some transparency and minor fixes.
